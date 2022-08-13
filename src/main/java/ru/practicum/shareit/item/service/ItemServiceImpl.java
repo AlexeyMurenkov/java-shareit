@@ -32,14 +32,12 @@ public class ItemServiceImpl implements ItemService {
                 Optional.ofNullable(donor.getDescription()).orElse(recipient.getDescription()),
                 Optional.ofNullable(donor.getAvailable()).orElse(recipient.getAvailable()),
                 recipient.getOwnerId(),
-                recipient.getRequest()
-        );
+                recipient.getRequest());
     }
+
     @Override
     public Collection<ItemDto> getByUserId(long userId) {
-        return itemStorage.getByUserId(userId).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+        return itemStorage.getByUserId(userId).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 
     @Override

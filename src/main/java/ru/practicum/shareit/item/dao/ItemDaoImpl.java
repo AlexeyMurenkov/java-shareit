@@ -26,16 +26,8 @@ public class ItemDaoImpl implements ItemDao {
 
     @Override
     public Item create(Item item) {
-        return itemStorage.create(
-                Item.of(
-                        itemStorage.getNext(),
-                        item.getName(),
-                        item.getDescription(),
-                        item.getAvailable(),
-                        item.getOwnerId(),
-                        item.getRequest()
-                )
-        );
+        return itemStorage.create(Item.of(itemStorage.getNext(), item.getName(), item.getDescription(),
+                item.getAvailable(), item.getOwnerId(), item.getRequest()));
     }
 
     @Override

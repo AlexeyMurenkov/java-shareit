@@ -12,13 +12,9 @@ import javax.validation.constraints.Positive;
 @Value(staticConstructor = "of")
 public class Item {
     long id;
-    @NotBlank
-    String name;
-    @NotBlank
-    String description;
-    @NotNull
-    Boolean available;
-    @Positive(message = "Владелец вещи должен быть задан")
-    long ownerId;
+    @NotBlank String name;
+    @NotBlank String description;
+    @NotNull Boolean available;
+    @Positive(message = "Владелец вещи должен быть задан") long ownerId;
     ItemRequest request;
 }

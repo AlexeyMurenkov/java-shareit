@@ -35,12 +35,7 @@ public class UserDaoImpl implements UserDao {
     public User create(User user) {
         checkDuplicateEmail(user);
 
-        return userStorage.create(
-                User.of(
-                        userStorage.getNext(),
-                        user.getName(),
-                        user.getEmail())
-        );
+        return userStorage.create(User.of(userStorage.getNext(), user.getName(), user.getEmail()));
     }
 
     @Override
