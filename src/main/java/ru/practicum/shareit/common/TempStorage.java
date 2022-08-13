@@ -20,6 +20,7 @@ public class TempStorage<T> {
     public long getNext() {
         return counter + 1;
     }
+
     public Collection<T> getAll() {
         return storage.values();
     }
