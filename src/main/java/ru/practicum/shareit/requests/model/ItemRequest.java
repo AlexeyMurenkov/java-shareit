@@ -1,14 +1,21 @@
 package ru.practicum.shareit.requests.model;
 
-import lombok.Value;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDateTime;
+import javax.persistence.*;
 
-@Value(staticConstructor = "of")
+@Entity
+@Table(name = "requests", schema = "public")
+@NoArgsConstructor
+@Getter
 public class ItemRequest {
-    long id;
-    String description;
-    User requestor;
-    LocalDateTime created;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String description;
+    @ManyToOne
+    @JoinColumn(name = "requestor_id")
+    private User requestor;
 }

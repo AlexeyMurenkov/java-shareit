@@ -1,20 +1,28 @@
 package ru.practicum.shareit.item.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.requests.model.ItemRequest;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
+import javax.persistence.*;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Value(staticConstructor = "of")
+@Entity
+@Table(name = "items", schema = "public")
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor(staticName = "of")
 public class Item {
-    long id;
-    @NotBlank String name;
-    @NotBlank String description;
-    @NotNull Boolean available;
-    @Positive(message = "Владелец вещи должен быть задан") long ownerId;
-    ItemRequest request;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String description;
+    @Column(name = "is_available")
+    private boolean available;
+    @Column(name = "owner_id")
+    private Long ownerId;
+    @ManyToOne
+    @JoinColumn(name = "request_id")
+    private ItemRequest request;
 }
