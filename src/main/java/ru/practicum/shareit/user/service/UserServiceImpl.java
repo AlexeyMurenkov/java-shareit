@@ -1,6 +1,8 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.common.ModelValidator;
@@ -16,9 +18,10 @@ import static ru.practicum.shareit.user.dto.UserMapper.*;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class UserServiceImpl implements UserService {
-    private final UserRepository userStorage;
-    private final ModelValidator<UserDto> modelValidator;
+    UserRepository userStorage;
+    ModelValidator<UserDto> modelValidator;
 
     private UserDto patchUser(UserDto recipient, UserDto donor) {
         return UserDto.of(

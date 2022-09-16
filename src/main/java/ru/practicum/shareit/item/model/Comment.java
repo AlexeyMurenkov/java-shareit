@@ -1,8 +1,10 @@
 package ru.practicum.shareit.item.model;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
@@ -14,19 +16,20 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
     @NotBlank
-    private String text;
+    String text;
     @ManyToOne
     @JoinColumn(name = "item_id")
-    private Item item;
+    Item item;
     @ManyToOne
     @JoinColumn(name = "author_id")
-    private User author;
+    User author;
     @Column(name = "created_date")
-    private LocalDateTime created;
+    LocalDateTime created;
 
 }
