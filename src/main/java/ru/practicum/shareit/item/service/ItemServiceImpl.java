@@ -1,77 +1,156 @@
 package ru.practicum.shareit.item.service;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.common.ModelValidator;
+import ru.practicum.shareit.common.exceptoins.BadRequestException;
 import ru.practicum.shareit.common.exceptoins.ForbiddenException;
-import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.common.exceptoins.NotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemGetDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.Collection;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.item.dto.ItemMapper.fromItemDto;
-import static ru.practicum.shareit.item.dto.ItemMapper.toItemDto;
+import static ru.practicum.shareit.item.dto.CommentMapper.fromCommentDto;
+import static ru.practicum.shareit.item.dto.CommentMapper.toCommentDto;
+import static ru.practicum.shareit.item.dto.ItemMapper.*;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemDao itemStorage;
-    private final UserDao userStorage;
+    ItemRepository itemRepository;
+    UserRepository userRepository;
+    BookingRepository bookingRepository;
+    CommentRepository commentRepository;
+    ModelValidator<ItemDto> modelValidator;
 
-    private Item patchItem(Item recipient, Item donor) {
-        return Item.of(
+    private ItemDto patchItemDto(ItemDto recipient, ItemDto donor) {
+        return ItemDto.of(
                 recipient.getId(),
                 Optional.ofNullable(donor.getName()).orElse(recipient.getName()),
                 Optional.ofNullable(donor.getDescription()).orElse(recipient.getDescription()),
                 Optional.ofNullable(donor.getAvailable()).orElse(recipient.getAvailable()),
-                recipient.getOwnerId(),
-                recipient.getRequest());
+                recipient.getRequest()
+        );
+    }
+
+    private ItemGetDto toItemGetDto(Item item, User user) {
+        final Optional<Booking> lastBooking;
+        final Optional<Booking> nextBooking;
+        if (item.getOwnerId().equals(user.getId())) {
+            lastBooking = bookingRepository.findFirstByItemAndEndBeforeOrderByEndDesc(item, LocalDateTime.now());
+            nextBooking = bookingRepository.findFirstByItemAndStartAfterOrderByStartDesc(item, LocalDateTime.now());
+        } else {
+            lastBooking = Optional.empty();
+            nextBooking = Optional.empty();
+        }
+
+        final List<Comment> comments = commentRepository.findAllByItemOrderByCreated(item);
+
+        return ItemMapper.toItemGetDto(item, lastBooking, nextBooking, comments);
     }
 
     @Override
-    public Collection<ItemDto> getByUserId(long userId) {
-        return itemStorage.getByUserId(userId).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+    public List<ItemGetDto> getItemsByUserId(Long userId) {
+        final User user = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException(String.format("Запрос вещи несуществующим пользователем (id=%s)", userId))
+        );
+        final List<Item> items = itemRepository.findAllByOwnerIdOrderById(userId);
+
+        return items.stream().map(
+                (item) -> toItemGetDto(item, user)
+        ).collect(Collectors.toList());
     }
 
     @Override
-    public ItemDto getById(long itemId) {
-        return toItemDto(itemStorage.getById(itemId));
+    public ItemGetDto getItemById(Long itemId, Long userId) {
+
+        final User user = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException(String.format("Запрос вещи несуществующим пользователем (id=%s)", userId))
+        );
+
+        final Item item = itemRepository.findById(itemId).orElseThrow(
+                () -> new NotFoundException(String.format("Вещь с id=%s не найдена", itemId))
+        );
+
+        return toItemGetDto(item, user);
     }
 
     @Override
-    public ItemDto create(ItemDto itemDto, long userId) {
-        userStorage.getById(userId);
-        final Item item = fromItemDto(itemDto, 0, userId);
-        final Item createdItem = itemStorage.create(item);
+    public ItemDto createItem(ItemDto itemDto, Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(String.format("Попытка создания вещи несуществующим пользователем (id=%s)",
+                    userId));
+        }
+        modelValidator.apply(itemDto);
+        final Item item = fromItemDto(itemDto, userId);
+        final Item createdItem = itemRepository.save(item);
 
         return toItemDto(createdItem);
     }
 
     @Override
-    public ItemDto update(ItemDto itemDto, long itemId, long userId) {
-        final User owner = userStorage.getById(userId);
-        final Item item = itemStorage.getById(itemId);
+    public ItemDto updateItem(ItemDto itemDto, Long itemId, Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(String.format("Попытка создания вещи несуществующим пользователем (id=%s)",
+                    userId));
+        }
+        final Item item = itemRepository.findById(itemId).orElseThrow(
+                () -> new NotFoundException(String.format("Попытка обновления несуществующей вещи (id=%s)", itemId))
+        );
 
-        if (item.getOwnerId() == owner.getId()) {
-            final Item donorItem = fromItemDto(itemDto, itemId, userId);
-            return toItemDto(itemStorage.update(patchItem(item, donorItem)));
+        if (!item.getOwnerId().equals(userId)) {
+            throw new ForbiddenException(String.format("Попытка пользователя с id=%s обновить вещь пользователя id=%s",
+                    userId, item.getOwnerId()));
         }
 
-        throw new ForbiddenException(String.format("Попытка пользователя с id=%s обновить вещь пользователя id=%s",
-                userId, item.getOwnerId()));
+        final ItemDto recipient = toItemDto(item);
+        final ItemDto patched = patchItemDto(recipient, itemDto);
+        modelValidator.apply(patched);
+        return toItemDto(itemRepository.save(fromItemDto(patched, userId)));
     }
 
     @Override
-    public Collection<ItemDto> searchBySubstring(String substring) {
-        return itemStorage.searchBySubstring(substring).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+    public List<ItemDto> searchItemsBySubstring(String substring) {
+        if (substring.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return toItemsDto(itemRepository.searchSubstring(substring));
+    }
+
+    @Override
+    public CommentDto createComment(CommentDto commentDto, Long itemId, Long userId) {
+
+        final User user = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException(String.format("Комментарий несуществующего пользователя (id=%s)", userId))
+        );
+
+        final Item item = itemRepository.findById(itemId).orElseThrow(
+                () -> new NotFoundException(String.format("Комментарий к несуществующей вещи (id=%s)", itemId))
+        );
+
+        if (bookingRepository.findAllByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now()).isEmpty()) {
+            throw new BadRequestException("Пользователь не брал вещь в аренду или не завершил ее");
+        }
+        return toCommentDto(commentRepository.save(fromCommentDto(commentDto, item, user)));
     }
 }

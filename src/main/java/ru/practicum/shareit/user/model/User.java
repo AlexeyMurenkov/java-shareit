@@ -1,16 +1,23 @@
 package ru.practicum.shareit.user.model;
 
-import lombok.Value;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
+import javax.persistence.*;
 
-@Value(staticConstructor = "of")
+@Entity
+@Table(name = "users", schema = "public")
+@NoArgsConstructor
+@AllArgsConstructor(staticName = "of")
+@Getter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
-    long id;
-    @NotNull(message = "Имя пользователя не заполнено")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
     String name;
-    @NotNull(message = "email пользователя не заполнен")
-    @Email(message = "Невалидный email пользователя")
     String email;
 }

@@ -1,6 +1,7 @@
 package ru.practicum.shareit.common.exceptoins;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,20 +12,20 @@ import java.util.Map;
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFoundException(NotFoundException e) {
-        return Map.of("Объект не найден", e.getMessage());
+    public ResponseEntity<Map<String, String>> handleNotFoundException(NotFoundException e) {
+        return new ResponseEntity<>(Map.of("Error message", e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleBadRequestException(BadRequestException e) {
-        return Map.of("Неверный запрос", e.getMessage());
+        return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleConflictException(ConflictException e) {
-        return Map.of("Конфликт", e.getMessage());
+        return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler
@@ -36,6 +37,6 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public Map<String, String> handleForbiddenException(ForbiddenException e) {
-        return Map.of("Доступ запрещен", e.getMessage());
+        return Map.of("error", e.getMessage());
     }
 }

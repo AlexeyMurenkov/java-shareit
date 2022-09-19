@@ -5,27 +5,31 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.requests.model.ItemRequest;
+import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "items", schema = "public")
+@Table(name = "comments", schema = "public")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Item {
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    String name;
-    String description;
-    @Column(name = "is_available")
-    boolean available;
-    @Column(name = "owner_id")
-    Long ownerId;
+    @NotBlank
+    String text;
     @ManyToOne
-    @JoinColumn(name = "request_id")
-    ItemRequest request;
+    @JoinColumn(name = "item_id")
+    Item item;
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    User author;
+    @Column(name = "created_date")
+    LocalDateTime created;
+
 }
