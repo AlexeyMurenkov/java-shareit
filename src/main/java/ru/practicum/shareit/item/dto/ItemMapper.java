@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.dto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.requests.model.ItemRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,15 +26,19 @@ public class ItemMapper {
         return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 
-    public static Item fromItemDto(ItemDto itemDto, Long userId) {
+    public static Item fromItemDto(ItemDto itemDto, Long userId, ItemRequest request) {
         return Item.of(
                 itemDto.getId(),
                 itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 userId,
-                null
+                request
         );
+    }
+
+    public static Item fromItemDto(ItemDto itemDto, Long userId) {
+        return fromItemDto(itemDto, userId, null);
     }
 
     public static ItemGetDto toItemGetDto(Item item, Optional<Booking> lastBooking, Optional<Booking> nextBooking,
