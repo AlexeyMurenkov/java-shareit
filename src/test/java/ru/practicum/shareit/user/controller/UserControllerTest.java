@@ -33,7 +33,6 @@ class UserControllerTest {
 
     MockMvc mockMvc;
 
-
     UserDto testUser = UserDto.of(1L, "Test user 1", "user1@email.test");
 
     List<UserDto> testUsers = List.of(

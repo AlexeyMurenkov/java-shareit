@@ -35,9 +35,7 @@ class ItemControllerTest {
 
     MockMvc mockMvc;
 
-
     ItemDto testItemDto = ItemDto.of(1L, "Test item dto", "description", true, 1L);
-
     CommentDto testCommentDto = CommentDto.of(1L, "comment", "Author", null);
     ItemGetDto testItemGetDto = ItemGetDto.of(
             1L,
@@ -48,7 +46,6 @@ class ItemControllerTest {
             ItemGetDto.BookingDto.of(2L, 1L, null, null),
             List.of(CommentDto.of(1L, "Test comment", "Author", null))
         );
-
     List<ItemGetDto> testItemsGetDto = List.of(
             testItemGetDto,
             ItemGetDto.of(
