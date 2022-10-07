@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,7 +79,7 @@ class ItemRequestServiceTest {
     void getItemRequestsByRequestorId() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
         when(itemRequestRepository.findAllByRequestorOrderByCreated(any(User.class)))
-                .thenReturn(List.of(testItemRequest));
+                .thenReturn(Set.of(testItemRequest));
 
         final List<ItemRequestDto> itemRequestsDto = itemRequestService.getItemRequestsByRequestorId(1L);
 
@@ -136,7 +137,7 @@ class ItemRequestServiceTest {
     void getRequestById() {
         when(userRepository.existsById(anyLong())).thenReturn(true);
         when(itemRequestRepository.findById(anyLong())).thenReturn(Optional.of(testItemRequest));
-        when(itemRepository.findAllByRequest(any(ItemRequest.class))).thenReturn(Collections.emptyList());
+        when(itemRepository.findAllByRequest(any(ItemRequest.class))).thenReturn(Collections.emptySet());
 
         final ItemRequestDto itemRequestDto = itemRequestService.getRequestById(1L, 1L);
 

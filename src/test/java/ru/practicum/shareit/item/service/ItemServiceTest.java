@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -295,7 +296,7 @@ class ItemServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(testItem));
         when(bookingRepository.findAllByItemIdAndBookerIdAndEndBefore(anyLong(), anyLong(), any(LocalDateTime.class)))
-                .thenReturn(Collections.emptyList());
+                .thenReturn(Collections.emptySet());
 
         Throwable e = assertThrows(BadRequestException.class, () -> itemService.createComment(testCommentDto, 1L,
                 1L),"Комментарий к вещи, которую пользователь не брал не вызывает исключения");
@@ -310,7 +311,7 @@ class ItemServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(testItem));
         when(bookingRepository.findAllByItemIdAndBookerIdAndEndBefore(anyLong(), anyLong(), any(LocalDateTime.class)))
-                .thenReturn(List.of(testBooking));
+                .thenReturn(Set.of(testBooking));
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
         final CommentDto commentDto = itemService.createComment(testCommentDto, 1L, 1L);

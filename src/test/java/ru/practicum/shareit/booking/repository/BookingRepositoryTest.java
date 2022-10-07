@@ -19,6 +19,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -269,11 +270,11 @@ class BookingRepositoryTest {
     @Test
     @DirtiesContext
     void findAllByItemIdAndBookerIdAndEndBefore() {
-        final List<Booking> bookingsByBooker2 = bookingRepository.findAllByItemIdAndBookerIdAndEndBefore(1L,
+        final Set<Booking> bookingsByBooker2 = bookingRepository.findAllByItemIdAndBookerIdAndEndBefore(1L,
                 2L, TEST_TIME);
         assertTrue(bookingsByBooker2.isEmpty(),
                 "Для вещи 2 арендатора 2 возвращается непустой список прошлых аренд");
-        final List<Booking> bookingsByBooker1 = bookingRepository.findAllByItemIdAndBookerIdAndEndBefore(2L,
+        final Set<Booking> bookingsByBooker1 = bookingRepository.findAllByItemIdAndBookerIdAndEndBefore(2L,
                 1L, TEST_TIME);
         assertEquals(4, bookingsByBooker1.size(),
                 "Неверное количество прошлых аренд для веши 2 для арендатора 1");

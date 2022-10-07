@@ -19,6 +19,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static ru.practicum.shareit.requests.dto.ItemRequestMapper.*;
 import static ru.practicum.shareit.user.dto.UserMapper.toUserDto;
@@ -81,7 +82,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 () -> new NotFoundException("Обращение к несуществующему запросу")
         );
 
-        final List<Item> items = itemRepository.findAllByRequest(itemRequest);
+        final Set<Item> items = itemRepository.findAllByRequest(itemRequest);
 
         return toItemRequestDto(itemRequest, items);
     }

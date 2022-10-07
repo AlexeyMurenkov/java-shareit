@@ -3,6 +3,7 @@ package ru.practicum.shareit.requests.dto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.requests.model.ItemRequest;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -13,7 +14,7 @@ import static ru.practicum.shareit.user.dto.UserMapper.fromUserDto;
 import static ru.practicum.shareit.user.dto.UserMapper.toUserDto;
 
 public class ItemRequestMapper {
-    public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest, List<Item> items) {
+    public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest, Collection<Item> items) {
         return ItemRequestDto.of(
                 itemRequest.getId(),
                 itemRequest.getDescription(),
@@ -27,8 +28,8 @@ public class ItemRequestMapper {
         return toItemRequestDto(itemRequest, Collections.emptyList());
     }
 
-    public static List<ItemRequestDto> toItemRequestsDto(List<ItemRequest> itemRequests,
-                                                         Function<ItemRequest, List<Item>> getItems) {
+    public static List<ItemRequestDto> toItemRequestsDto(Collection<ItemRequest> itemRequests,
+                                                         Function<ItemRequest, Collection<Item>> getItems) {
         return itemRequests.stream()
                 .map(itemRequest -> toItemRequestDto(itemRequest, getItems.apply(itemRequest)))
                 .collect(Collectors.toList());

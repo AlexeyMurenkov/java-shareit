@@ -11,6 +11,7 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByBooker(User booker, Pageable pageable);
@@ -45,7 +46,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByItemOwnerIdAndStatus(Long bookerId, BookingStatus status, Pageable pageable);
 
-    List<Booking> findAllByItemIdAndBookerIdAndEndBefore(Long itemId, Long bookerId, LocalDateTime end);
+    Set<Booking> findAllByItemIdAndBookerIdAndEndBefore(Long itemId, Long bookerId, LocalDateTime end);
 
     Optional<Booking> findFirstByItemAndEndBeforeOrderByEndDesc(Item item, LocalDateTime end);
 

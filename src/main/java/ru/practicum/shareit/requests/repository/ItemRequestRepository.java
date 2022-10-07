@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.requests.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.List;
+import java.util.Set;
 
 public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> {
-    List<ItemRequest> findAllByRequestorOrderByCreated(User requestor);
+    Set<ItemRequest> findAllByRequestorOrderByCreated(User requestor);
 
     @Query(
             "select ir " +

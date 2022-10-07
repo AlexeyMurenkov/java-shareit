@@ -17,6 +17,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -90,8 +91,8 @@ class ItemRepositoryTest {
     @Test
     @DirtiesContext
     void findAllByRequest() {
-        final List<Item> items = itemRepository.findAllByRequest(testItemRequest);
+        final Set<Item> items = itemRepository.findAllByRequest(testItemRequest);
         assertEquals(1, items.size(), "Возвращается неверынй размер списка");
-        assertEqualsItems(testItem2, items.get(0));
+        assertEqualsItems(testItem2, items.stream().findAny().get());
     }
 }

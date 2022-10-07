@@ -7,12 +7,13 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.requests.model.ItemRequest;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findAllByOwnerId(Long ownerId, Pageable pageable);
 
-    List<Item> findAllByRequest(ItemRequest itemRequest);
+    Set<Item> findAllByRequest(ItemRequest itemRequest);
 
     @Query(
             "select i " +

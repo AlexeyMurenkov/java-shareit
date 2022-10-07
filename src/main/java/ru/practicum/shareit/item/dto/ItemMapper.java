@@ -5,6 +5,7 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.requests.model.ItemRequest;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,7 +23,7 @@ public class ItemMapper {
         );
     }
 
-    public static List<ItemDto> toItemsDto(List<Item> items) {
+    public static List<ItemDto> toItemsDto(Collection<Item> items) {
         return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 
