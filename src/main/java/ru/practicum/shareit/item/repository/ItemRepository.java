@@ -1,14 +1,19 @@
 package ru.practicum.shareit.item.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.requests.model.ItemRequest;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    List<Item> findAllByOwnerIdOrderById(Long ownerId);
+    List<Item> findAllByOwnerId(Long ownerId, Pageable pageable);
+
+    Set<Item> findAllByRequest(ItemRequest itemRequest);
 
     @Query(
             "select i " +
@@ -17,5 +22,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "       or upper(i.description) like upper(concat('%', ?1, '%'))) " +
             "       and i.available = true"
     )
-    List<Item> searchSubstring(String substring);
+    List<Item> searchSubstring(String substring, Pageable pageable);
 }

@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -11,12 +12,14 @@ import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 @Slf4j
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Validated
 public class ItemController {
 
     private final ItemService itemService;
@@ -29,9 +32,11 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemGetDto> getByUserId(@RequestHeader("X-Sharer-User-Id") @NotNull Long userId) {
-        log.debug("Запрос списка вещей пользователя с id={}", userId);
-        return itemService.getItemsByUserId(userId);
+    public Collection<ItemGetDto> getByUserId(@RequestHeader("X-Sharer-User-Id") @NotNull Long userId,
+                                              @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                              @RequestParam(defaultValue = "10") @PositiveOrZero int size) {
+        log.debug("Запрос списка вещей пользователя с id={} постранично from={}, size={}", userId, from, size);
+        return itemService.getItemsByUserId(userId, from, size);
     }
 
     @PostMapping
@@ -48,9 +53,11 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> searchBySubstring(@RequestParam String text) {
-        log.debug("Запрос списка вещей по подстроке '{}'", text);
-        return itemService.searchItemsBySubstring(text);
+    public Collection<ItemDto> searchBySubstring(@RequestParam String text,
+                                                 @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                                 @RequestParam(defaultValue = "10") @PositiveOrZero int size) {
+        log.debug("Запрос списка вещей по подстроке '{}' постранично from={}, size={}", text, from, size);
+        return itemService.searchItemsBySubstring(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

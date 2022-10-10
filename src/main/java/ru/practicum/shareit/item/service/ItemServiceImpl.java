@@ -4,6 +4,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -19,6 +22,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.requests.model.ItemRequest;
+import ru.practicum.shareit.requests.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -37,7 +42,10 @@ import static ru.practicum.shareit.item.dto.ItemMapper.*;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ItemServiceImpl implements ItemService {
 
+    static Sort SORT_BY_START_ASC = Sort.by("id").ascending();
+
     ItemRepository itemRepository;
+    ItemRequestRepository itemRequestRepository;
     UserRepository userRepository;
     BookingRepository bookingRepository;
     CommentRepository commentRepository;
@@ -49,7 +57,7 @@ public class ItemServiceImpl implements ItemService {
                 Optional.ofNullable(donor.getName()).orElse(recipient.getName()),
                 Optional.ofNullable(donor.getDescription()).orElse(recipient.getDescription()),
                 Optional.ofNullable(donor.getAvailable()).orElse(recipient.getAvailable()),
-                recipient.getRequest()
+                recipient.getRequestId()
         );
     }
 
@@ -70,11 +78,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemGetDto> getItemsByUserId(Long userId) {
+    public List<ItemGetDto> getItemsByUserId(Long userId, int from, int size) {
         final User user = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException(String.format("Запрос вещи несуществующим пользователем (id=%s)", userId))
         );
-        final List<Item> items = itemRepository.findAllByOwnerIdOrderById(userId);
+
+        final Pageable pageable = PageRequest.of(from / size, size, SORT_BY_START_ASC);
+        final List<Item> items = itemRepository.findAllByOwnerId(userId, pageable);
 
         return items.stream().map(
                 (item) -> toItemGetDto(item, user)
@@ -102,7 +112,11 @@ public class ItemServiceImpl implements ItemService {
                     userId));
         }
         modelValidator.apply(itemDto);
-        final Item item = fromItemDto(itemDto, userId);
+        final Long requestId = itemDto.getRequestId();
+        final ItemRequest itemRequest = requestId != null ? itemRequestRepository.findById(requestId).orElseThrow(
+                () -> new NotFoundException("Создание вещи для несуществующего запроса")
+        ) : null;
+        final Item item = fromItemDto(itemDto, userId, itemRequest);
         final Item createdItem = itemRepository.save(item);
 
         return toItemDto(createdItem);
@@ -130,11 +144,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItemsBySubstring(String substring) {
+    public List<ItemDto> searchItemsBySubstring(String substring, int from, int size) {
         if (substring.isEmpty()) {
             return Collections.emptyList();
         }
-        return toItemsDto(itemRepository.searchSubstring(substring));
+
+        final Pageable pageable = PageRequest.of(from / size, size, SORT_BY_START_ASC);
+
+        return toItemsDto(itemRepository.searchSubstring(substring, pageable));
     }
 
     @Override
