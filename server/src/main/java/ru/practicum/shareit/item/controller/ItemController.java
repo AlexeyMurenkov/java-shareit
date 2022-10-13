@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.controller;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +17,10 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ItemController {
 
-    private final ItemService itemService;
+    ItemService itemService;
 
     @GetMapping("/{itemId}")
     public ItemGetDto getById(@RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable Long itemId) {
